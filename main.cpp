@@ -97,15 +97,8 @@ int main(int argc, char** argv) {
     int lenght = 600;
 	TGAImage image(lenght, lenght, TGAImage::RGB);
 //	image.set(52, 41, red);
-//	image.set(52, 46, red);
 //	line(0, 0, lenght / 2, lenght / 2 - 100, image);
-//	line(0, 0, lenght / 2, lenght / 2 + 100, image);
-//	line(0, lenght / 2, lenght, lenght / 2, image); //
-//    line(0, lenght / 2, lenght, lenght / 2, image); //
-//	line(lenght / 2, 0, lenght / 2, lenght, image); //
-//	line(0, lenght, lenght, 0, image);
-//	line(0, 0, lenght, lenght, image);
-	Model *m = new Model("C:\\Users\\yh\\pj\\p\\bin\\Debug\\african_head.obj");
+	Model *m = new Model("I:\\github\\learn_tinyrenderer\\bin\\Debug\\african_head.obj");
     for(int i=0; i < m->nfaces(); i++) {
         std::vector<int> faces = m->face(i);
         for(int j=0; j < faces.size(); j++){

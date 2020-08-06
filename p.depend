@@ -32,3 +32,36 @@
 1596454852 c:\users\yh\pj\p\geometry.h
 	<cmath>
 
+1596728987 source:i:\github\learn_tinyrenderer\main.cpp
+	<iostream>
+	"tgaimage.h"
+	<time.h>
+	"model.h"
+
+1596728987 i:\github\learn_tinyrenderer\tgaimage.h
+	<fstream>
+
+1596728987 i:\github\learn_tinyrenderer\model.h
+	<vector>
+	"geometry.h"
+	<string>
+
+1596728987 i:\github\learn_tinyrenderer\geometry.h
+	<cmath>
+
+1596728987 source:i:\github\learn_tinyrenderer\model.cpp
+	"model.h"
+	<fstream>
+	<iostream>
+	<sstream>
+	"geometry.h"
+	<stdio.h>
+
+1596728987 source:i:\github\learn_tinyrenderer\tgaimage.cpp
+	<iostream>
+	<fstream>
+	<string.h>
+	<time.h>
+	<math.h>
+	"tgaimage.h"
+
