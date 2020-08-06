@@ -1,0 +1,34 @@
+# depslib dependency file v1.0
+1596529703 source:c:\users\yh\pj\p\main.cpp
+	<iostream>
+	"tgaimage.h"
+	<time.h>
+	"model.h"
+
+1421515814 c:\users\yh\pj\p\tgaimage.h
+	<fstream>
+
+1421515814 source:c:\users\yh\pj\p\tgaimage.cpp
+	<iostream>
+	<fstream>
+	<string.h>
+	<time.h>
+	<math.h>
+	"tgaimage.h"
+
+1596526066 source:c:\users\yh\pj\p\model.cpp
+	"model.h"
+	<fstream>
+	<iostream>
+	<sstream>
+	"geometry.h"
+	<stdio.h>
+
+1596455036 c:\users\yh\pj\p\model.h
+	<vector>
+	"geometry.h"
+	<string>
+
+1596454852 c:\users\yh\pj\p\geometry.h
+	<cmath>
+
