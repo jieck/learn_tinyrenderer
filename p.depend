@@ -32,3 +32,30 @@
 1596454852 c:\users\yh\pj\p\geometry.h
 	<cmath>
 
+1596526066 source:e:\repos\p\model.cpp
+	"model.h"
+	<fstream>
+	<iostream>
+	<sstream>
+	"geometry.h"
+	<stdio.h>
+
+1596455036 e:\repos\p\model.h
+	<vector>
+	"geometry.h"
+	<string>
+
+1596454852 e:\repos\p\geometry.h
+	<cmath>
+
+1421515814 source:e:\repos\p\tgaimage.cpp
+	<iostream>
+	<fstream>
+	<string.h>
+	<time.h>
+	<math.h>
+	"tgaimage.h"
+
+1421515814 e:\repos\p\tgaimage.h
+	<fstream>
+
