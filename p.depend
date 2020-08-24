@@ -32,7 +32,8 @@
 1596454852 c:\users\yh\pj\p\geometry.h
 	<cmath>
 
-<<<<<<< HEAD
+1596728987 D
+
 1596526066 source:e:\repos\p\model.cpp
 	"model.h"
 	<fstream>
@@ -42,7 +43,7 @@
 	<stdio.h>
 
 1596455036 e:\repos\p\model.h
-=======
+
 1596728987 source:i:\github\learn_tinyrenderer\main.cpp
 	<iostream>
 	"tgaimage.h"
@@ -53,17 +54,23 @@
 	<fstream>
 
 1596728987 i:\github\learn_tinyrenderer\model.h
->>>>>>> 432cdcead03b6f70fcda953a5573f4abb8d276ea
+
+1421515814 cdcead03b6f70fcda953a5573f4abb8d276ea
 	<vector>
 	"geometry.h"
 	<string>
+	<iostream>
+	<fstream>
+	<string.h>
+	<time.h>
+	<math.h>
+	"tgaimage.h"
 
-<<<<<<< HEAD
 1596454852 e:\repos\p\geometry.h
 	<cmath>
 
 1421515814 source:e:\repos\p\tgaimage.cpp
-=======
+
 1596728987 i:\github\learn_tinyrenderer\geometry.h
 	<cmath>
 
@@ -76,7 +83,29 @@
 	<stdio.h>
 
 1596728987 source:i:\github\learn_tinyrenderer\tgaimage.cpp
->>>>>>> 432cdcead03b6f70fcda953a5573f4abb8d276ea
+
+1421515814 e:\repos\p\tgaimage.h
+	<fstream>
+
+1421515814 
+
+1596526066 source:e:\repos\learn_tinyrenderer\model.cpp
+	"model.h"
+	<fstream>
+	<iostream>
+	<sstream>
+	"geometry.h"
+	<stdio.h>
+
+1596455036 e:\repos\learn_tinyrenderer\model.h
+	<vector>
+	"geometry.h"
+	<string>
+
+1596454852 e:\repos\learn_tinyrenderer\geometry.h
+	<cmath>
+
+1421515814 source:e:\repos\learn_tinyrenderer\tgaimage.cpp
 	<iostream>
 	<fstream>
 	<string.h>
@@ -84,9 +113,12 @@
 	<math.h>
 	"tgaimage.h"
 
-<<<<<<< HEAD
-1421515814 e:\repos\p\tgaimage.h
+1421515814 e:\repos\learn_tinyrenderer\tgaimage.h
 	<fstream>
 
-=======
->>>>>>> 432cdcead03b6f70fcda953a5573f4abb8d276ea
+1597926187 source:e:\repos\learn_tinyrenderer\main.cpp
+	<iostream>
+	"tgaimage.h"
+	<time.h>
+	"model.h"
+

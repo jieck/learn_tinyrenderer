@@ -138,7 +138,6 @@ void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
 
 void drawFrame() {
     int lenght = 600;
-<<<<<<< HEAD
     TGAImage image(lenght, lenght, TGAImage::RGB);
     //	image.set(52, 41, red);
     //	image.set(52, 46, red);
@@ -150,12 +149,6 @@ void drawFrame() {
     //	line(0, lenght, lenght, 0, image);
     //	line(0, 0, lenght, lenght, image);
 	Model *m = new Model("C:\\Users\\yh\\pj\\p\\bin\\Debug\\african_head.obj");
-=======
-	TGAImage image(lenght, lenght, TGAImage::RGB);
-//	image.set(52, 41, red);
-//	line(0, 0, lenght / 2, lenght / 2 - 100, image);
-	Model *m = new Model("I:\\github\\learn_tinyrenderer\\bin\\Debug\\african_head.obj");
->>>>>>> 432cdcead03b6f70fcda953a5573f4abb8d276ea
     for(int i=0; i < m->nfaces(); i++) {
         std::vector<int> faces = m->face(i);
         for(int j=0; j < faces.size(); j++){
