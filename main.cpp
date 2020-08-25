@@ -99,6 +99,7 @@ int main(int argc, char** argv) {
 //	image.set(52, 41, red);
 //	line(0, 0, lenght / 2, lenght / 2 - 100, image);
 	Model *m = new Model("I:\\github\\learn_tinyrenderer\\bin\\Debug\\african_head.obj");
+	//Model *m = new Model(".\\african_head.obj");
     for(int i=0; i < m->nfaces(); i++) {
         std::vector<int> faces = m->face(i);
         for(int j=0; j < faces.size(); j++){
