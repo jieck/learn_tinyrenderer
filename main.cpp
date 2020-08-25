@@ -114,7 +114,7 @@ void line(Vec2i t0, Vec2i t1, TGAImage &image, TGAColor color) {
         std::swap(y0, y1);
     }
     int derror = 0;
-    int dy = std::abs(y1 - y0);
+    int dy = std::abs(y1 - y0)*2;
     int dx = (x1 - x0);
     int y = y0;
     for(int x = x0; x <= x1; x++) {
@@ -126,7 +126,7 @@ void line(Vec2i t0, Vec2i t1, TGAImage &image, TGAColor color) {
         derror += dy;
         if (derror > dx) {
             y += y1 - y0 > 0 ? 1 : -1;
-            derror -= dx;
+            derror -= dx*2;
         }
     }
 }
@@ -170,8 +170,8 @@ void fillFaceTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor co
         std::swap(miny, maxy);
     }
     for(int i = miny; i <= maxy; i++){
-        int xa = t1.x * (i - t0.y+0.0) / dy + t0.x * (t1.y - i+0.0) / dy + 0.5;
-        int xb = t2.x * (i - t0.y+0.0) / dy + t0.x * (t2.y - i+0.0) / dy + 0.5;
+        int xa = (t1.x * (i - t0.y+0.0) / dy + t0.x * (t1.y - i+0.0) / dy) + 0.5;
+        int xb = (t2.x * (i - t0.y+0.0) / dy + t0.x * (t2.y - i+0.0) / dy) + 0.5;
         std::cout<< "xa:"<<xa<<"  xb:"<<xb<<" y:"<<i<<std::endl;
         if(xa > xb){
             std::swap(xa, xb);
@@ -205,8 +205,8 @@ void fillTriangleTest(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor co
         std::swap(miny, maxy);
     }
     for(int i = miny; i <= maxy; i++){
-        int xa = t1.x * (i - t0.y) / dy + t0.x * (t1.y - i) / dy;
-        int xb = t3.x * (i - t0.y) / dy + t0.x * (t3.y - i) / dy;
+        int xa = t1.x * (i - t0.y+0.0) / dy + t0.x * (t1.y - i+0.0) / dy;
+        int xb = t3.x * (i - t0.y+0.0) / dy + t0.x * (t3.y - i+0.0) / dy;
         std::cout<< "xa:"<<xa<<"  xb:"<<xb<<" y"<<i<<std::endl;
         if(xa > xb){
             std::swap(xa, xb);
@@ -231,7 +231,7 @@ void fillTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color)
     }
     int dx = t2.x - t0.x;
     int dy = t2.y - t0.y;
-    int x3 = t2.x * (t1.y - t0.y) / dy + t0.x * (t2.y - t1.y) / dy;
+    int x3 = t2.x * (t1.y - t0.y + 0.0) / dy + t0.x * (t2.y - t1.y+0.0) / dy + 0.5;
     Vec2i t3(x3, t1.y);
     //image.set(x3, t1.y, blue);
     fillFaceTriangle(t0, t1, t3, image, color);
@@ -244,10 +244,12 @@ void drawTriangles() {
     Vec2i t0[3] = {Vec2i(10, 70),   Vec2i(50, 160),  Vec2i(70, 80)};
     Vec2i t1[3] = {Vec2i(180, 50),  Vec2i(150, 1),   Vec2i(70, 180)};
     Vec2i t2[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)};
+    fillTriangle(t2[0], t2[1], t2[2], image, blue);
+    fillTriangle(t0[0], t0[1], t0[2], image, blue);
+    fillTriangle(t1[0], t1[1], t1[2], image, blue);
     triangle(t0[0], t0[1], t0[2], image, white);
     triangle(t1[0], t1[1], t1[2], image, red);
-    fillTriangle(t2[0], t2[1], t2[2], image, blue);
-    //triangle(t2[0], t2[1], t2[2], image, green);
+    triangle(t2[0], t2[1], t2[2], image, green);
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
 	image.write_tga_file("output.tga");
 }
