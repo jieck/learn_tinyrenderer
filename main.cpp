@@ -173,13 +173,12 @@ void fillButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGACo
     float curx1 = t1.x;
     float curx2 = t2.x;
     int xa = t1.x, xb = t2.x;
-    for(int i = t0.y; i >= t1.y; i--){
+    for(int i = t1.y; i <= t0.y; i++){
         for(int j = xa; j <= xb; j++){
             image.set(j, i, color);
         }
-        std::cout<< "xa = " << xa << "   xb = "<< xb << std::endl;
-        curx1 -= invslope1;
-        curx2 -= invslope2;
+        curx1 += invslope1;
+        curx2 += invslope2;
         xa = curx1;
         xb = curx2;
     }
@@ -190,17 +189,17 @@ void fillTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor
     if (t1.x > t2.x) {
         std::swap(t1, t2);
     }
-    float invslope1 = (t0.x - t1.x + 0.0) / (t0.y - t1.y);
-    float invslope2 = (t0.x - t2.x + 0.0) / (t0.y - t2.y);
+    float invslope1 = (t1.x - t0.x + 0.0) / (t1.y - t0.y);
+    float invslope2 = (t2.x - t0.x + 0.0) / (t2.y - t0.y);
     float curx1 = t1.x;
     float curx2 = t2.x;
-    int xa = t0.x, xb = t0.x;
-    for(int i = t1.y; i <= t0.y; i--){
+    int xa = t1.x, xb = t2.x;
+    for(int i = t1.y; i >= t0.y; i--){
         for(int j = xa; j <= xb; j++){
             image.set(j, i, color);
         }
-        curx1 += invslope1;
-        curx2 += invslope2;
+        curx1 -= invslope1;
+        curx2 -= invslope2;
         xa = curx1;
         xb = curx2;
     }
