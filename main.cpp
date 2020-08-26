@@ -64,7 +64,7 @@ void line_v2(int x0, int y0, int x1, int y1, TGAImage &image) {
 }
 
 // quick version
-void line1(int x0, int y0, int x1, int y1, TGAImage &image) {
+void line_v3(int x0, int y0, int x1, int y1, TGAImage &image) {
     int yLen = std::abs(y1 - y0);
     int xLen = std::abs(x1 - x0);
     bool steep = false;
@@ -142,8 +142,8 @@ void drawFrame() {
 	TGAImage image(lenght, lenght, TGAImage::RGB);
 //	image.set(52, 41, red);
 //	line(0, 0, lenght / 2, lenght / 2 - 100, image);
-	Model *m = new Model("I:\\github\\learn_tinyrenderer\\bin\\Debug\\african_head.obj");
-	//Model *m = new Model(".\\african_head.obj");
+	//Model *m = new Model("I:\\github\\learn_tinyrenderer\\bin\\Debug\\african_head.obj");
+	Model *m = new Model("E:\\repos\\learn_tinyrenderer\\output.tga");
     for(int i=0; i < m->nfaces(); i++) {
         std::vector<int> faces = m->face(i);
         for(int j=0; j < faces.size(); j++){
@@ -155,34 +155,91 @@ void drawFrame() {
             int x1 = (end.x + 1) / 2 * lenght;
             int y1 = (end.y + 1) / 2 * lenght;
 //            std::cout<< x0 << " "<< y0 << " " << x1 << " " << y1 <<std::endl;
-            line1(x0, y0, x1, y1, image);
+            Vec2i t0(x0, y0), t1(x1, y1);
+            line(t0, t1, image, blue);
         }
     }
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-	image.write_tga_file("output.tga");
+	image.write_tga_file("output_frame.tga");
 }
 
-void fillFaceTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
+// 下平底三角形
+void fillButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
+    if (t1.x > t2.x) {
+        std::swap(t1, t2);
+    }
+    float invslope1 = (t0.x - t1.x + 0.0) / (t0.y - t1.y);
+    float invslope2 = (t0.x - t2.x + 0.0) / (t0.y - t2.y);
+    float curx1 = t1.x;
+    float curx2 = t2.x;
+    int xa = t1.x, xb = t2.x;
+    for(int i = t0.y; i >= t1.y; i--){
+        for(int j = xa; j <= xb; j++){
+            image.set(j, i, color);
+        }
+        std::cout<< "xa = " << xa << "   xb = "<< xb << std::endl;
+        curx1 -= invslope1;
+        curx2 -= invslope2;
+        xa = curx1;
+        xb = curx2;
+    }
+}
+
+// 上平底三角形
+void fillTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
+    if (t1.x > t2.x) {
+        std::swap(t1, t2);
+    }
+    float invslope1 = (t0.x - t1.x + 0.0) / (t0.y - t1.y);
+    float invslope2 = (t0.x - t2.x + 0.0) / (t0.y - t2.y);
+    float curx1 = t1.x;
+    float curx2 = t2.x;
+    int xa = t0.x, xb = t0.x;
+    for(int i = t1.y; i <= t0.y; i--){
+        for(int j = xa; j <= xb; j++){
+            image.set(j, i, color);
+        }
+        curx1 += invslope1;
+        curx2 += invslope2;
+        xa = curx1;
+        xb = curx2;
+    }
+}
+
+// 平底三角形 v1
+void fillFlatTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
+    int dy = t1.y - t0.y;
+    int miny = t1.y;
+    int maxy = t0.y;
+    if(miny > maxy){
+        std::swap(miny, maxy);
+    }
+    for(int i = miny; i <= maxy; i++){
+        int xa = ((t1.x + 0.5) * (i - t0.y) / dy + (t0.x + 0.5) * (t1.y - i) / dy);
+        int xb = ((t2.x + 0.5) * (i - t0.y) / dy + (t0.x + 0.5) * (t2.y - i) / dy);
+        if(xa > xb){
+            std::swap(xa, xb);
+        }
+        for(int j = xa; j <= xb; j++){
+            image.set(j, i, color);
+        }
+    }
+}
+
+// 平底三角形 分上下平底三角形处理
+void fillFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
     int dy = t1.y - t0.y;
     int miny = t0.y;
     int maxy = t1.y;
     if(miny > maxy){
-        std::swap(miny, maxy);
+        fillButtomFlatTriangle(t0, t1, t2, image, color);
     }
-    for(int i = miny; i <= maxy; i++){
-        int xa = (t1.x * (i - t0.y+0.0) / dy + t0.x * (t1.y - i+0.0) / dy) + 0.5;
-        int xb = (t2.x * (i - t0.y+0.0) / dy + t0.x * (t2.y - i+0.0) / dy) + 0.5;
-        std::cout<< "xa:"<<xa<<"  xb:"<<xb<<" y:"<<i<<std::endl;
-        if(xa > xb){
-            std::swap(xa, xb);
-        }
-        for(int j = xa; j <= xb; j++){
-            image.set(j, i, color);
-        }
+    else {
+        fillTopFlatTriangle(t0, t1, t2, image, color);
     }
 }
-
-void fillTriangleTest(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
+//Standard 一般性的填充三角形算法
+void fillTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
     // 三个点按照y坐标从小到大排序
     if(t0.y > t1.y) {
         std::swap(t0, t1);
@@ -193,33 +250,63 @@ void fillTriangleTest(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor co
     if(t0.y > t1.y) {
         std::swap(t0, t1);
     }
-    int dx = t2.x - t0.x;
-    int dy = t2.y - t0.y;
-    int x3 = t2.x * (t1.y - t0.y) / dy + t0.x * (t2.y - t1.y) / dy;
-    Vec2i t3(x3, t1.y);
-    //image.set(x3, t1.y, blue);
-    dy = t1.y - t0.y;
-    int miny = t0.y;
-    int maxy = t1.y;
-    if(miny > maxy){
-        std::swap(miny, maxy);
+    // 是平底三角形
+    if (t0.y == t1.y || t1.y == t2.y){
+        fillFlatTriangle(t0, t1, t2, image, color);
+    }else{ // 不是平底三角形，分割成两个平底三角形
+        int dx = t2.x - t0.x;
+        int dy = t2.y - t0.y;
+        int x3 = t2.x * (t1.y - t0.y + 0.0) / dy + t0.x * (t2.y - t1.y+0.0) / dy + 0.5;
+        Vec2i t3(x3, t1.y);
+        fillFlatTriangle(t0, t1, t3, image, color);
+        fillFlatTriangle(t2, t1, t3, image, color);
     }
-    for(int i = miny; i <= maxy; i++){
-        int xa = t1.x * (i - t0.y+0.0) / dy + t0.x * (t1.y - i+0.0) / dy;
-        int xb = t3.x * (i - t0.y+0.0) / dy + t0.x * (t3.y - i+0.0) / dy;
-        std::cout<< "xa:"<<xa<<"  xb:"<<xb<<" y"<<i<<std::endl;
-        if(xa > xb){
-            std::swap(xa, xb);
-        }
-        for(int j = xa; j <= xb; j++){
-            image.set(j, i, color);
-        }
-    }
-    fillFaceTriangle(t0, t1, t2, image, color);
 }
 
-void fillTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
-    // 三个点按照y坐标从小到大排序
+// 下平底三角形
+void bresenhamTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
+    int x0 = t0.x;
+    int y0 = t0.y;
+    int x1 = t1.x;
+    int y1 = t1.y;
+    int dya = std::abs(y1 - y0);
+    int dxa = std::abs(x1 - x0);
+    bool steep = false;
+    if (dxa < dya) {
+        std::swap(x0, y0);
+        std::swap(x1, y1);
+        steep = true;
+    }
+    if (x0 > x1) {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+    int derror = 0;
+    int dy = std::abs(y1 - y0)*2;
+    int dx = (x1 - x0);
+    int y = y0;
+    for(int x = x0; x <= x1; x++) {
+        if (steep) {
+            image.set(y, x, color);
+        }else {
+            image.set(x, y, color);
+        }
+        derror += dy;
+        if (derror > dx) {
+            y += y1 - y0 > 0 ? 1 : -1;
+            derror -= dx*2;
+        }
+    }
+    while(y != t1.y) {
+        if(y < t1.y) {
+
+        }
+        y<t1.y?y++:y--;
+    }
+}
+
+// Bresenham
+void fillTriangle_v2(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
     if(t0.y > t1.y) {
         std::swap(t0, t1);
     }
@@ -229,34 +316,41 @@ void fillTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color)
     if(t0.y > t1.y) {
         std::swap(t0, t1);
     }
-    int dx = t2.x - t0.x;
-    int dy = t2.y - t0.y;
-    int x3 = t2.x * (t1.y - t0.y + 0.0) / dy + t0.x * (t2.y - t1.y+0.0) / dy + 0.5;
-    Vec2i t3(x3, t1.y);
-    //image.set(x3, t1.y, blue);
-    fillFaceTriangle(t0, t1, t3, image, color);
-    fillFaceTriangle(t2, t1, t3, image, color);
+    // 是平底三角形
+    if (t0.y == t1.y || t1.y == t2.y){
+        fillFlatTriangle(t0, t1, t2, image, color);
+    }else{ // 不是平底三角形，分割成两个平底三角形
+        int dx = t2.x - t0.x;
+        int dy = t2.y - t0.y;
+        int x3 = t2.x * (t1.y - t0.y + 0.0) / dy + t0.x * (t2.y - t1.y+0.0) / dy + 0.5;
+        Vec2i t3(x3, t1.y);
+        fillFlatTriangle(t0, t1, t3, image, color);
+        fillFlatTriangle(t2, t1, t3, image, color);
+    }
 }
 
-void drawTriangles() {
+void drawTriangles_frame() {
     int lenght = 600;
     TGAImage image(lenght, lenght, TGAImage::RGB);
     Vec2i t0[3] = {Vec2i(10, 70),   Vec2i(50, 160),  Vec2i(70, 80)};
     Vec2i t1[3] = {Vec2i(180, 50),  Vec2i(150, 1),   Vec2i(70, 180)};
     Vec2i t2[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)};
-    fillTriangle(t2[0], t2[1], t2[2], image, blue);
-    fillTriangle(t0[0], t0[1], t0[2], image, blue);
-    fillTriangle(t1[0], t1[1], t1[2], image, blue);
-    triangle(t0[0], t0[1], t0[2], image, white);
-    triangle(t1[0], t1[1], t1[2], image, red);
-    triangle(t2[0], t2[1], t2[2], image, green);
+    fillTriangle_v1(t2[0], t2[1], t2[2], image, blue);
+    fillTriangle_v1(t0[0], t0[1], t0[2], image, blue);
+    fillTriangle_v1(t1[0], t1[1], t1[2], image, blue);
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
 	image.write_tga_file("output.tga");
-}
 
+	TGAImage image1(lenght, lenght, TGAImage::RGB);
+	triangle(t0[0], t0[1], t0[2], image1, white);
+    triangle(t1[0], t1[1], t1[2], image1, red);
+    triangle(t2[0], t2[1], t2[2], image1, green);
+	image1.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+	image1.write_tga_file("output11.tga");
+}
 
 int main(int argc, char** argv) {
     //drawFrame();
-    drawTriangles();
+    drawTriangles_frame();
 	return 0;
 }
