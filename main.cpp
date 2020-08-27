@@ -114,8 +114,8 @@ void line(Vec2i t0, Vec2i t1, TGAImage &image, TGAColor color) {
         std::swap(y0, y1);
     }
     int derror = 0;
-    int dy = std::abs(y1 - y0)*2;
-    int dx = (x1 - x0);
+    int dy = yLen*2;
+    int dx = xLen;
     int y = y0;
     for(int x = x0; x <= x1; x++) {
         if (steep) {
@@ -163,7 +163,7 @@ void drawFrame() {
 	image.write_tga_file("output_frame.tga");
 }
 
-// 下平底三角形
+// 下平底三角形 std
 void fillButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
     if (t1.x > t2.x) {
         std::swap(t1, t2);
@@ -184,7 +184,7 @@ void fillButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGACo
     }
 }
 
-// 上平底三角形
+// 上平底三角形 std
 void fillTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
     if (t1.x > t2.x) {
         std::swap(t1, t2);
@@ -205,7 +205,7 @@ void fillTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor
     }
 }
 
-// 平底三角形 v1
+// 平底三角形 v1 std
 void fillFlatTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
     int dy = t1.y - t0.y;
     int miny = t1.y;
@@ -225,6 +225,83 @@ void fillFlatTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor
     }
 }
 
+
+// 下平底三角形 bresenham
+void bresenhamButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
+    if(t1.x > t2.x) {
+        std::swap(t1, t2);
+    }
+    int x0 = t0.x;
+    int y0 = t0.y;
+    int x1 = t1.x;
+    int y1 = t1.y;
+    int x2 = t2.x;
+    int dya = std::abs(y1 - y0);
+    int dxa = std::abs(x1 - x0);
+    int dxb = std::abs(x2 - x0);
+    int derror = 0;
+    int dy = dya;
+    int dx = dxa*2;
+    int xa = x1;
+    int derror1 = 0;
+    int dy1 = dya;
+    int dx1 = dxb*2;
+    int xb = x2;
+    for(int y = y1; y <= y0; y++) {
+        derror += dx;
+        while (derror > dy) {
+            xa += x0 - x1 > 0 ? 1 : -1;
+            derror -= dy*2;
+        }
+        derror1 += dx1;
+        while (derror1 > dy1) {
+            xb += x0 - x2 > 0 ? 1: -1;
+            derror1 -= dy1*2;
+        }
+        for(int j = xa; j <= xb; j++){
+            image.set(j, y, color);
+        }
+    }
+}
+
+// 上平底三角形 bresenham
+void bresenhamTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
+    if(t1.x > t2.x) {
+        std::swap(t1, t2);
+    }
+    int x0 = t0.x;
+    int y0 = t0.y;
+    int x1 = t1.x;
+    int y1 = t1.y;
+    int x2 = t2.x;
+    int dya = std::abs(y1 - y0);
+    int dxa = std::abs(x1 - x0);
+    int dxb = std::abs(x2 - x0);
+    int derror = 0;
+    int dy = dya;
+    int dx = dxa*2;
+    int xa = x1;
+    int derror1 = 0;
+    int dy1 = dya;
+    int dx1 = dxb*2;
+    int xb = x2;
+    for(int y = y1; y >= y0; y--) {
+        derror += dx;
+        while (derror > dy) {
+            xa += x0 - x1 > 0 ? 1 : -1;
+            derror -= dy*2;
+        }
+        derror1 += dx1;
+        while (derror1 > dy1) {
+            xb += x0 - x2 > 0 ? 1: -1;
+            derror1 -= dy1*2;
+        }
+        for(int j = xa; j <= xb; j++){
+            image.set(j, y, color);
+        }
+    }
+}
+
 // 平底三角形 分上下平底三角形处理
 void fillFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
     int dy = t1.y - t0.y;
@@ -232,14 +309,16 @@ void fillFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor co
     int maxy = t1.y;
     if(miny > maxy){
         fillButtomFlatTriangle(t0, t1, t2, image, color);
+        //bresenhamButtomFlatTriangle(t0, t1, t2, image, color);
     }
     else {
         fillTopFlatTriangle(t0, t1, t2, image, color);
+        //bresenhamTopFlatTriangle(t0, t1, t2, image, color);
     }
 }
-//Standard 一般性的填充三角形算法
-void fillTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
-    // 三个点按照y坐标从小到大排序
+
+// Bresenham
+void fillTriangle_v2(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
     if(t0.y > t1.y) {
         std::swap(t0, t1);
     }
@@ -262,50 +341,9 @@ void fillTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor col
     }
 }
 
-// 下平底三角形
-void bresenhamTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
-    int x0 = t0.x;
-    int y0 = t0.y;
-    int x1 = t1.x;
-    int y1 = t1.y;
-    int dya = std::abs(y1 - y0);
-    int dxa = std::abs(x1 - x0);
-    bool steep = false;
-    if (dxa < dya) {
-        std::swap(x0, y0);
-        std::swap(x1, y1);
-        steep = true;
-    }
-    if (x0 > x1) {
-        std::swap(x0, x1);
-        std::swap(y0, y1);
-    }
-    int derror = 0;
-    int dy = std::abs(y1 - y0)*2;
-    int dx = (x1 - x0);
-    int y = y0;
-    for(int x = x0; x <= x1; x++) {
-        if (steep) {
-            image.set(y, x, color);
-        }else {
-            image.set(x, y, color);
-        }
-        derror += dy;
-        if (derror > dx) {
-            y += y1 - y0 > 0 ? 1 : -1;
-            derror -= dx*2;
-        }
-    }
-    while(y != t1.y) {
-        if(y < t1.y) {
-
-        }
-        y<t1.y?y++:y--;
-    }
-}
-
-// Bresenham
-void fillTriangle_v2(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
+//三角形
+void fillTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
+    // 三个点按照y坐标从小到大排序
     if(t0.y > t1.y) {
         std::swap(t0, t1);
     }
@@ -337,15 +375,15 @@ void drawTriangles_frame() {
     fillTriangle_v1(t2[0], t2[1], t2[2], image, blue);
     fillTriangle_v1(t0[0], t0[1], t0[2], image, blue);
     fillTriangle_v1(t1[0], t1[1], t1[2], image, blue);
-    image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-	image.write_tga_file("output.tga");
+    //image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+	//image.write_tga_file("output.tga");
 
-	TGAImage image1(lenght, lenght, TGAImage::RGB);
-	triangle(t0[0], t0[1], t0[2], image1, white);
-    triangle(t1[0], t1[1], t1[2], image1, red);
-    triangle(t2[0], t2[1], t2[2], image1, green);
-	image1.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-	image1.write_tga_file("output11.tga");
+	//TGAImage image1(lenght, lenght, TGAImage::RGB);
+	//triangle(t0[0], t0[1], t0[2], image1, white);
+    //triangle(t1[0], t1[1], t1[2], image1, red);
+    //triangle(t2[0], t2[1], t2[2], image1, green);
+	//image1.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+	//image1.write_tga_file("output11.tga");
 }
 
 int main(int argc, char** argv) {
