@@ -114,8 +114,8 @@ void line(Vec2i t0, Vec2i t1, TGAImage &image, TGAColor color) {
         std::swap(y0, y1);
     }
     int derror = 0;
-    int dy = yLen*2;
-    int dx = xLen;
+    int dy = std::abs(y1 - y0)*2;
+    int dx = x1 - x0;
     int y = y0;
     for(int x = x0; x <= x1; x++) {
         if (steep) {
@@ -248,6 +248,9 @@ void bresenhamButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, 
     int dx1 = dxb*2;
     int xb = x2;
     for(int y = y1; y <= y0; y++) {
+        for(int j = xa; j <= xb; j++){
+            image.set(j, y, color);
+        }
         derror += dx;
         while (derror > dy) {
             xa += x0 - x1 > 0 ? 1 : -1;
@@ -258,9 +261,7 @@ void bresenhamButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, 
             xb += x0 - x2 > 0 ? 1: -1;
             derror1 -= dy1*2;
         }
-        for(int j = xa; j <= xb; j++){
-            image.set(j, y, color);
-        }
+
     }
 }
 
@@ -286,6 +287,9 @@ void bresenhamTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGA
     int dx1 = dxb*2;
     int xb = x2;
     for(int y = y1; y >= y0; y--) {
+        for(int j = xa; j <= xb; j++){
+            image.set(j, y, color);
+        }
         derror += dx;
         while (derror > dy) {
             xa += x0 - x1 > 0 ? 1 : -1;
@@ -296,9 +300,6 @@ void bresenhamTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGA
             xb += x0 - x2 > 0 ? 1: -1;
             derror1 -= dy1*2;
         }
-        for(int j = xa; j <= xb; j++){
-            image.set(j, y, color);
-        }
     }
 }
 
@@ -308,12 +309,12 @@ void fillFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor co
     int miny = t0.y;
     int maxy = t1.y;
     if(miny > maxy){
-        fillButtomFlatTriangle(t0, t1, t2, image, color);
-        //bresenhamButtomFlatTriangle(t0, t1, t2, image, color);
+//        fillButtomFlatTriangle(t0, t1, t2, image, color);
+        bresenhamButtomFlatTriangle(t0, t1, t2, image, color);
     }
     else {
-        fillTopFlatTriangle(t0, t1, t2, image, color);
-        //bresenhamTopFlatTriangle(t0, t1, t2, image, color);
+//        fillTopFlatTriangle(t0, t1, t2, image, color);
+        bresenhamTopFlatTriangle(t0, t1, t2, image, color);
     }
 }
 
@@ -375,15 +376,18 @@ void drawTriangles_frame() {
     fillTriangle_v1(t2[0], t2[1], t2[2], image, blue);
     fillTriangle_v1(t0[0], t0[1], t0[2], image, blue);
     fillTriangle_v1(t1[0], t1[1], t1[2], image, blue);
-    //image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-	//image.write_tga_file("output.tga");
+    image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+    image.write_tga_file("output.tga");
 
-	//TGAImage image1(lenght, lenght, TGAImage::RGB);
-	//triangle(t0[0], t0[1], t0[2], image1, white);
-    //triangle(t1[0], t1[1], t1[2], image1, red);
-    //triangle(t2[0], t2[1], t2[2], image1, green);
-	//image1.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-	//image1.write_tga_file("output11.tga");
+//	TGAImage image1(lenght, lenght, TGAImage::RGB);
+//	Vec2i t3[3] = {Vec2i(10, 70),   Vec2i(50, 160),  Vec2i(70, 80)};
+//    Vec2i t4[3] = {Vec2i(180, 50),  Vec2i(150, 1),   Vec2i(70, 180)};
+//    Vec2i t5[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)};
+//	triangle(t3[0], t3[1], t3[2], image, white);
+//    triangle(t4[0], t4[1], t4[2], image, red);
+//    triangle(t5[0], t5[1], t5[2], image, green);
+//	image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+//	image.write_tga_file("output11.tga");
 }
 
 int main(int argc, char** argv) {
