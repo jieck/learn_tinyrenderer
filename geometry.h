@@ -66,7 +66,7 @@ public:
         return Vec3<T>(x*v, y*v, z*v);
     }
 
-    inline const T operator^(const Vec3 v)const {
+    inline const Vec3<T> operator^(const Vec3 v)const {
         return Vec3<T>(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x);
     }
 
@@ -75,7 +75,7 @@ public:
     }
 
     inline const Vec3<T> normalize() {
-        T n = this.normal();
+        T n = this->normal();
         *this = Vec3<T>(x/n, y/n, z/n);
         return *this;
     }

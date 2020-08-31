@@ -140,10 +140,7 @@ void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color) {
 void drawFrame() {
     int lenght = 600;
 	TGAImage image(lenght, lenght, TGAImage::RGB);
-//	image.set(52, 41, red);
-//	line(0, 0, lenght / 2, lenght / 2 - 100, image);
-	//Model *m = new Model("I:\\github\\learn_tinyrenderer\\bin\\Debug\\african_head.obj");
-	Model *m = new Model("E:\\repos\\learn_tinyrenderer\\output.tga");
+	Model *m = new Model("african_head.obj");
     for(int i=0; i < m->nfaces(); i++) {
         std::vector<int> faces = m->face(i);
         for(int j=0; j < faces.size(); j++){
@@ -252,12 +249,12 @@ void bresenhamButtomFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, 
             image.set(j, y, color);
         }
         derror += dx;
-        while (derror > dy) {
+        while (derror > dy && dy != 0) {
             xa += x0 - x1 > 0 ? 1 : -1;
             derror -= dy*2;
         }
         derror1 += dx1;
-        while (derror1 > dy1) {
+        while (derror1 > dy1 && dy1 != 0) {
             xb += x0 - x2 > 0 ? 1: -1;
             derror1 -= dy1*2;
         }
@@ -291,12 +288,12 @@ void bresenhamTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGA
             image.set(j, y, color);
         }
         derror += dx;
-        while (derror > dy) {
+        while (derror > dy && dy != 0) {
             xa += x0 - x1 > 0 ? 1 : -1;
             derror -= dy*2;
         }
         derror1 += dx1;
-        while (derror1 > dy1) {
+        while (derror1 > dy1 && dy1 != 0) {
             xb += x0 - x2 > 0 ? 1: -1;
             derror1 -= dy1*2;
         }
@@ -305,16 +302,15 @@ void bresenhamTopFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGA
 
 // 平底三角形 分上下平底三角形处理
 void fillFlatTriangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
-    int dy = t1.y - t0.y;
-    int miny = t0.y;
-    int maxy = t1.y;
-    if(miny > maxy){
+    if(t0.y > t1.y){
 //        fillButtomFlatTriangle(t0, t1, t2, image, color);
         bresenhamButtomFlatTriangle(t0, t1, t2, image, color);
+//        fillFlatTriangle_v1(t0, t1, t2, image, color);
     }
     else {
 //        fillTopFlatTriangle(t0, t1, t2, image, color);
         bresenhamTopFlatTriangle(t0, t1, t2, image, color);
+//        fillFlatTriangle_v1(t0, t1, t2, image, color);
     }
 }
 
@@ -355,8 +351,12 @@ void fillTriangle_v1(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor col
         std::swap(t0, t1);
     }
     // 是平底三角形
-    if (t0.y == t1.y || t1.y == t2.y){
+    if (t0.y == t1.y){
+        fillFlatTriangle(t2, t0, t1, image, color);
+    }else if(t1.y == t2.y) {
         fillFlatTriangle(t0, t1, t2, image, color);
+    }else if (t0.y == t2.y) {
+         fillFlatTriangle(t1, t0, t2, image, color);
     }else{ // 不是平底三角形，分割成两个平底三角形
         int dx = t2.x - t0.x;
         int dy = t2.y - t0.y;
@@ -378,20 +378,40 @@ void drawTriangles_frame() {
     fillTriangle_v1(t1[0], t1[1], t1[2], image, blue);
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
     image.write_tga_file("output.tga");
+}
 
-//	TGAImage image1(lenght, lenght, TGAImage::RGB);
-//	Vec2i t3[3] = {Vec2i(10, 70),   Vec2i(50, 160),  Vec2i(70, 80)};
-//    Vec2i t4[3] = {Vec2i(180, 50),  Vec2i(150, 1),   Vec2i(70, 180)};
-//    Vec2i t5[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)};
-//	triangle(t3[0], t3[1], t3[2], image, white);
-//    triangle(t4[0], t4[1], t4[2], image, red);
-//    triangle(t5[0], t5[1], t5[2], image, green);
-//	image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-//	image.write_tga_file("output11.tga");
+void drawFlat() {
+    int lenght = 600;
+	TGAImage image(lenght, lenght, TGAImage::RGB);
+	Model *m = new Model("african_head.obj");
+    for(int i=0; i < m->nfaces(); i++) {
+        std::vector<int> faces = m->face(i);
+        Vec2i t0[3];
+        Vec3f world[3];
+        for(int j=0; j < faces.size(); j++){
+//            std::cout<< "faces.size==" << faces.size() <<  "  j==" << j << " m->nfaces()" <<  m->nfaces() << " i =" << i << std::endl;
+            Vec3f start = m->vert(faces[j]);
+            int x0 = (start.x + 1) / 2 * lenght;
+            int y0 = (start.y + 1) / 2 * lenght;
+            t0[j] = Vec2i(x0, y0); //, t1(x1, y1);
+            world[j] = start;
+        }
+//        std::cout << t0[0].x << "-" << t0[0].y << "-"  << t0[1].x << "-"  << t0[1].y << "-"  << t0[2].x << "-"  << t0[2].y << std::endl;
+        Vec3f n = (world[0]-world[1]) ^ (world[2] - world[0]);
+        n.normalize();
+        float inten = n * Vec3f(0.0, 0.0, -1.0);
+        if (inten > 0) {
+            fillTriangle_v1(t0[0], t0[1], t0[2], image, TGAColor(inten*255, inten*255, inten*255, 255));
+        }
+    }
+    image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+	image.write_tga_file("output_flat.tga");
 }
 
 int main(int argc, char** argv) {
     //drawFrame();
-    drawTriangles_frame();
+    //drawTriangles_frame();
+    drawFlat();
+    //drawFrame();
 	return 0;
 }
