@@ -1,7 +1,10 @@
 #include <iostream>
 #include "tgaimage.h"
+#include <algorithm>
 #include <time.h>
 #include "model.h"
+#include <vector>
+#include <memory>
 
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red   = TGAColor(255, 0,   0,   255);
@@ -407,11 +410,31 @@ void drawFlat() {
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
 	image.write_tga_file("output_flat.tga");
 }
+std::unique_ptr<int> myfunction (std::unique_ptr<int> i) {  // function:
+    std::cout << ' ' << *i << std::endl;
+    return i;
+}
+int test(){
+    std::vector<std::unique_ptr<int>> veci;
+    veci.push_back(std::unique_ptr<int>(new int(1)));
+    std::cout <<"size1:"<< veci.size() << std::endl;
+    for_each(veci.begin(), veci.end(), myfunction);
+    for(auto i = veci.begin(); i !=veci.end(); i++ ){
+            if(*i && (*i).get()) {
+                std::cout << ' ' << (**i);
+            }else {
+                std::cout << " - " << std::endl;
+            }
+    }
+    std::cout<<"size2:" << veci.size() << std::endl;
+}
+
 
 int main(int argc, char** argv) {
     //drawFrame();
     //drawTriangles_frame();
     drawFlat();
     //drawFrame();
+    test();
 	return 0;
 }
