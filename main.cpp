@@ -495,9 +495,17 @@ void drawFlat_zbuffer() {
 	image.write_tga_file("drawFlatZbuffer.tga");
 }
 
+void drawWithTexture() {
+    int length = 800;
+    TGAImage image(length, length, TGAImage::RGB);
+    Model * m = new Model("african_head.obj");
+    for(int i=0; i < )
+}
+
 int main(int argc, char** argv) {
-    drawFrame();
-    drawTriangles_frame();
+    //drawFrame();
+    //drawTriangles_frame();
     drawFlat_zbuffer();
+    drawWithTexture();
 	return 0;
 }
