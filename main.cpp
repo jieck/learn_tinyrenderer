@@ -471,11 +471,13 @@ void drawFlat_zbuffer() {
 
     for(int i=0; i < m->nfaces(); i++) {
         std::vector<int> faces = m->face(i);
+        std::vector<int> faceuvs = m->faceuv(i);
         Vec3i t0[3];
         Vec3f world[3];
         for(int j=0; j < faces.size(); j++){
 //            std::cout<< "faces.size==" << faces.size() <<  "  j==" << j << " m->nfaces()" <<  m->nfaces() << " i =" << i << std::endl;
             Vec3f start = m->vert(faces[j]);
+            Vec3f uv = m->uvs(faceuvs[j]);
             int x0 = (start.x + 1) / 2 * lenght;
             int y0 = (start.y + 1) / 2 * lenght;
             int z0 = (start.z + 1) / 2 * lenght;
@@ -496,10 +498,39 @@ void drawFlat_zbuffer() {
 }
 
 void drawWithTexture() {
-    int length = 800;
-    TGAImage image(length, length, TGAImage::RGB);
-    Model * m = new Model("african_head.obj");
-    for(int i=0; i < )
+    int lenght = 800;
+	TGAImage image(lenght, lenght, TGAImage::RGB);
+	Model *m = new Model("african_head.obj");
+	int* zbuffer = new int[lenght * lenght]{0};
+
+    for(int i=0; i < m->nfaces(); i++) {
+        std::vector<int> faces = m->face(i);
+        std::vector<int> faceuvs = m->faceuv(i);
+        Vec3i t0[3];
+        Vec3f world[3];
+        for(int j=0; j < faces.size(); j++){
+//            std::cout<< "faces.size==" << faces.size() <<  "  j==" << j << " m->nfaces()" <<  m->nfaces() << " i =" << i << std::endl;
+            Vec3f start = m->vert(faces[j]);
+            Vec3f uv = m->uvs(faceuvs[j]);
+            int u = uv.u * lenght;
+            int v = uv.v * lenght;
+            int x0 = (start.x + 1) / 2 * lenght;
+            int y0 = (start.y + 1) / 2 * lenght;
+            int z0 = (start.z + 1) / 2 * lenght;
+            t0[j] = Vec3i(x0, y0, z0); //, t1(x1, y1);
+            world[j] = start;
+        }
+//        std::cout << t0[0].x << "-" << t0[0].y << "-"  << t0[1].x << "-"  << t0[1].y << "-"  << t0[2].x << "-"  << t0[2].y << std::endl;
+        Vec3f n = (world[0]-world[1]) ^ (world[2] - world[0]);
+        n.normalize();
+        //std::cout<< n.x << "n.y" << n.y << "n.z" << n.z << std::endl;
+        float inten = n * Vec3f(0.0, 0.0, -1.0);
+        if (inten > 0) {
+            fillTriangle_v1(t0[0], t0[1], t0[2], image, TGAColor(inten*255, inten*255, inten*255, 255), zbuffer );
+        }
+    }
+    image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
+	image.write_tga_file("drawFlatZbuffer.tga");
 }
 
 int main(int argc, char** argv) {
