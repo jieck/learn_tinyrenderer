@@ -502,7 +502,7 @@ void drawWithTexture() {
     int length = 800;
     TGAImage image(length, length, TGAImage::RGB);
     Model * m = new Model("african_head.obj");
-    for(int i=0; i < )
+    //for(int i=0; i < )
 }
 std::unique_ptr<int> myfunction (std::unique_ptr<int> i) {  // function:
     std::cout << ' ' << *i << std::endl;
@@ -512,7 +512,7 @@ int test(){
     std::vector<std::unique_ptr<int>> veci;
     veci.push_back(std::unique_ptr<int>(new int(1)));
     std::cout <<"size1:"<< veci.size() << std::endl;
-    for_each(veci.begin(), veci.end(), myfunction);
+    //for_each(veci.begin(), veci.end(), myfunction);
     for(auto i = veci.begin(); i !=veci.end(); i++ ){
             if(*i && (*i).get()) {
                 std::cout << ' ' << (**i);
@@ -521,6 +521,7 @@ int test(){
             }
     }
     std::cout<<"size2:" << veci.size() << std::endl;
+    return 0;
 }
 
 
@@ -529,6 +530,6 @@ int main(int argc, char** argv) {
     //drawTriangles_frame();
     drawFlat();
     drawFlat_zbuffer();
-    drawWithTexture();
+    //drawWithTexture();
 	return 0;
 }

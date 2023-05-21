@@ -42,11 +42,11 @@ Model::Model(const std::string &path) {
 }
 
 int Model::nverts() {
-    this->verts_.size();
+    return this->verts_.size();
 }
 
 int Model::nfaces() {
-    this->faces_.size();
+    return this->faces_.size();
 }
 
 std::vector<int> Model::face(int idx) {
