@@ -38,6 +38,9 @@ public:
         *this = Vec2<T>(x/n, y/n);
         return *this;
     }
+    inline const T operator[](const int index)const {
+        return ((T*)this)[index];
+    }
 };
 
 template <typename T>

@@ -424,6 +424,15 @@ void fillTriangle_v1(Vec3i& t0, Vec3i& t1, Vec3i& t2, TGAImage &image, TGAColor 
     }
 }
 
+Vec3f barycentri1c(Vec3f* pts, Vec3f P) {
+    Vec3f u = Vec3f(pts[2].x - pts[0].x, pts[1].x - pts[0].x, pts[0].x - P.x) ^ Vec3f(pts[2].y - pts[0].y, pts[1].y - pts[0].y, pts[0].y - P.y);
+    /* `pts` and `P` has integer value as coordinates
+       so `abs(u[2])` < 1 means `u[2]` is 0, that means
+       triangle is degenerate, in this case return something with negative coordinates */
+    if (std::abs(u.z) < 1) return Vec3f(-1, 1, 1);
+    return Vec3f(1.f - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
+}
+
 void drawTriangles_frame() {
     int lenght = 600;
     TGAImage image(lenght, lenght, TGAImage::RGB);
@@ -466,25 +475,97 @@ void drawFlat() {
 	image.write_tga_file("drawFlat.tga");
 }
 
-void drawFlat_zbuffer() {
-    int lenght = 800;
-	TGAImage image(lenght, lenght, TGAImage::RGB);
-	Model *m = new Model("african_head.obj");
-	int* zbuffer = new int[lenght * lenght]{0};
+Vec3f barycentric(Vec3f* pts, Vec3f P) {
+    Vec3f u = Vec3f(pts[2].x - pts[0].x, pts[1].x - pts[0].x, pts[0].x - P.x) ^ Vec3f(pts[2].y-pts[0].y, pts[1].y-pts[0].y, pts[0].y-P.y);
+    if (std::abs(u.z) < 1) return Vec3f(-1,1,1);
+    return Vec3f(1.f - (u.x + u.y) / u.z, u.x / u.z, u.y / u.z);
+    float r = ((pts[0].y - pts[1].y) * P.x + (pts[1].x - pts[0].x) * P.y + pts[0].x * pts[1].y - pts[1].x * pts[0].y) /
+        ((pts[0].y - pts[1].y) * pts[2].x + (pts[1].x - pts[0].x) * pts[2].y + pts[0].x * pts[1].y - pts[1].x * pts[0].y);
+    float b = ((pts[0].y - pts[2].y) * P.x + (pts[2].x - pts[0].x) * P.y + pts[0].x * pts[2].y - pts[2].x * pts[0].y) /
+        ((pts[0].y - pts[2].y) * pts[1].x + (pts[2].x - pts[0].x) * pts[1].y + pts[0].x * pts[2].y - pts[2].x * pts[0].y);
+    return Vec3f(1.f - r - b, b, r);
+}
 
+Vec3f barycentric_ccj(Vec3f* pts, Vec3f P) {
+    float r = ((pts[0].y - pts[1].y) * P.x + (pts[1].x - pts[0].x) * P.y + pts[0].x * pts[1].y - pts[1].x * pts[0].y) /
+        ((pts[0].y - pts[1].y) * pts[2].x + (pts[1].x - pts[0].x) * pts[2].y + pts[0].x * pts[1].y - pts[1].x * pts[0].y);
+    float b = ((pts[0].y - pts[2].y) * P.x + (pts[2].x - pts[0].x) * P.y + pts[0].x * pts[2].y - pts[2].x * pts[0].y) /
+        ((pts[0].y - pts[2].y) * pts[1].x + (pts[2].x - pts[0].x) * pts[1].y + pts[0].x * pts[2].y - pts[2].x * pts[0].y);
+    return Vec3f(1.f - r - b, b, r);
+}
+static float* record = new float[600 * 600];
+void triangle(Vec3f* pts, Vec3f* uv, float* zbuffer, TGAImage& image, TGAImage& texture, TGAColor color) {
+    Vec2f bboxmin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    Vec2f bboxmax(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+    Vec2f clamp(image.get_width(), image.get_height());
+    for (int i = 0; i < 3; i++) {
+        bboxmin.x = std::max(0.f, std::min(bboxmin.x, pts[i].x));
+        bboxmin.y = std::max(0.f, std::min(bboxmin.y, pts[i].y));
+
+        bboxmax.x = std::min(clamp.x, std::max(bboxmax.x, pts[i].x));
+        bboxmax.y = std::min(clamp.y, std::max(bboxmax.y, pts[i].y));
+    }
+    Vec3i P;
+    for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
+        for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
+            Vec3f bc_screen = barycentric_ccj(pts, Vec3f(P.x, P.y, P.z));
+            if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0) continue;
+            P.z = pts[0].z * bc_screen.x + pts[1].z * bc_screen.y + pts[2].z * bc_screen.z;
+            if (zbuffer[int(int(P.y) * 600 + P.x)] < P.z) {
+                //record[int(P.y * image.get_width() + P.x]
+                //std::cout << int(color.r) << int(color.g) << int(color.b) << std::endl;
+                int w, h;
+                float pu, pv;
+                pu = uv[0].x * bc_screen.x + uv[1].x * bc_screen.y + uv[2].x * bc_screen.z;
+                pv = uv[0].y * bc_screen.x + uv[1].y * bc_screen.y + uv[2].y * bc_screen.z;
+                //std::cout << int(Tt.r) << "_" << int(Tt.g) << "_" << int(Tt.a) << std::endl;
+                w = pu * texture.get_width();
+                h = (1.f - pv) * texture.get_height();
+                //std::cout << pu << "_" << pv << "_" << w << "_" << h << "_" << uv[0].x << "_" << uv[0].y<< std::endl;
+                //TGAColor Tt(texture.get(w, h))
+                TGAColor Tt(texture.get(w, h));
+                //std::cout << int(Tt.r) << "_" << int(Tt.g) << "_" << int(Tt.a) << std::endl;
+                image.set((int)P.x, (int)P.y, texture.get(w, h));
+                //std::cout << P.x << " _ " << P.y << "\n" << std::endl;
+                //std::cout << int(P.y * image.get_width() + P.x) << "_" << zbuffer[int(P.y * image.get_width() + P.x)] << "_" << P.z << std::endl;
+                
+                zbuffer[int(int(P.y) * image.get_width() + P.x)] = P.z;
+       
+            }
+            else {
+                auto color1 = image.get((int)P.x, (int)P.y);
+                //std::cout << "__" << int(color1.r) << int(color1.g) << int(color1.b) << std::endl;
+            }
+            //image.set(P.x, P.y, color);
+        }
+    }
+}
+
+void drawFlat_zbuffer() {
+    int lenght = 600;
+	TGAImage image(lenght, lenght, TGAImage::RGB);
+    TGAImage texture;
+    texture.read_tga_file("african_head_diffuse.tga");
+	Model *m = new Model("african_head.obj");
+    float* zbuffer = new float[lenght * lenght]{0};
+    for (int i = 0; i < lenght * lenght; i++) {
+        zbuffer[i] = -10086;
+    }
     for(int i=0; i < m->nfaces(); i++) {
         std::vector<int> faces = m->face(i);
         std::vector<int> faceuvs = m->faceuv(i);
-        Vec3i t0[3];
+        Vec3f t0[3];
         Vec3f world[3];
+        Vec3f uvs[3];
         for(int j=0; j < faces.size(); j++){
 //            std::cout<< "faces.size==" << faces.size() <<  "  j==" << j << " m->nfaces()" <<  m->nfaces() << " i =" << i << std::endl;
             Vec3f start = m->vert(faces[j]);
-            Vec3f uv = m->uvs(faceuvs[j]);
-            int x0 = (start.x + 1) / 2 * lenght;
-            int y0 = (start.y + 1) / 2 * lenght;
-            int z0 = (start.z + 1) / 2 * lenght;
-            t0[j] = Vec3i(x0, y0, z0); //, t1(x1, y1);
+            //Vec3f uv = m->uvs(faceuvs[j]);
+            float x0 = (start.x + 1) / 2 * lenght;
+            float y0 = (start.y + 1) / 2 * lenght;
+            float z0 = (start.z + 1) / 2 * lenght;
+            t0[j] = Vec3f(x0, y0, z0); //, t1(x1, y1);
+            uvs[j] = m->uvs(faceuvs[j]);
             world[j] = start;
         }
 //        std::cout << t0[0].x << "-" << t0[0].y << "-"  << t0[1].x << "-"  << t0[1].y << "-"  << t0[2].x << "-"  << t0[2].y << std::endl;
@@ -493,7 +574,8 @@ void drawFlat_zbuffer() {
         //std::cout<< n.x << "n.y" << n.y << "n.z" << n.z << std::endl;
         float inten = n * Vec3f(0.0, 0.0, -1.0);
         if (inten > 0) {
-            fillTriangle_v1(t0[0], t0[1], t0[2], image, TGAColor(inten*255, inten*255, inten*255, 255), zbuffer);
+            triangle(t0, uvs, zbuffer, image, texture, TGAColor(inten * 255, inten * 255, inten * 255, 255));
+           // fillTriangle_v1(t0[0], t0[1], t0[2], image, TGAColor(inten*255, inten*255, inten*255, 255), zbuffer);
         }
     }
     image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
@@ -564,7 +646,7 @@ int test(){
 int main(int argc, char** argv) {
     //drawFrame();
     //drawTriangles_frame();
-    drawFlat();
+    //drawFlat();
     drawFlat_zbuffer();
     //drawWithTexture();
 	return 0;
